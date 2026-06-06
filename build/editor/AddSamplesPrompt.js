@@ -1,0 +1,605 @@
+import { HTML, SVG } from "imperative-html/dist/esm/elements-strict";
+import { Config } from "../synth/SynthConfig";
+import { clamp, parseFloatWithDefault, parseIntWithDefault } from "../synth/synth";
+import { ColorConfig } from "./ColorConfig";
+import { EditorConfig } from "./EditorConfig";
+const { div, input, button, a, code, textarea, details, summary, span, ul, li, select, option, h2 } = HTML;
+export class AddSamplesPrompt {
+    constructor(_doc) {
+        this._maxSamples = 64;
+        this._entries = [];
+        this._doReload = false;
+        this._entryOptionsDisplayStates = {};
+        this._cancelButton = button({ class: "cancelButton" });
+        this._okayButton = button({ class: "okayButton", style: "width: 45%;" }, "Okay");
+        this._addSampleButton = button({ style: "height: auto; min-height: var(--button-size);" }, "Add sample");
+        this._entryContainer = div();
+        this._addMultipleSamplesButton = button({ style: "height: auto; min-height: var(--button-size); margin-left: 0.5em;" }, "Add multiple samples");
+        this._addSamplesAreaBottom = div({ style: "margin-top: 0.5em;" }, this._addSampleButton, this._addMultipleSamplesButton);
+        this._instructionsLink = a({ href: "#" }, "Wanna add your own samples? Click here!");
+        this._description = div(div({ style: "margin-bottom: 0.5em; -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; cursor: text;" }, "Before you ask: "), div({ style: "margin-bottom: 0.5em; -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; cursor: text;" }, "legacySamples", " = Pandoras Box's Samples "), div({ style: "margin-bottom: 0.5em; -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; cursor: text;" }, "nintariboxSamples", " = nintaribox's Samples "), div({ style: "margin-bottom: 0.5em; -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; cursor: text;" }, "marioPaintboxSamples", " = MarioPaintBox's Samples."), div({ style: "margin-bottom: 0.5em;" }, "The order of these samples is important - if you change it you'll break your song!", "Since they're sorted by which ones you added first, changing the position of the sample in the list will", "change your instruments' sample to a different sample!"), div({ style: "margin-bottom: 0.5em;" }, this._instructionsLink));
+        this._closeInstructionsButton = button({ style: "height: auto; min-height: var(--button-size); width: 100%;" }, "Close instructions");
+        this._instructionsArea = div({ style: "display: none; margin-top: 0; -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; cursor: text; overflow-y: auto;" }, div({ class: "promptTitle" }, h2({ class: "samplesExt", style: "text-align: inherit;" }, ""), h2({ class: "samplesTitle", style: "margin-bottom: 0.5em;" }, "Add Samples")), div({ style: "margin-top: 0.5em; margin-bottom: 0.5em;" }, "In UB and in turn AB, custom samples are loaded from arbitrary URLs."), div({ style: `margin-top: 0.5em; margin-bottom: 0.5em; color: ${ColorConfig.secondaryText};` }, "(Technically, the web server behind the URL needs to support ", a({ href: "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS", target: "_blank", }, "CORS"), ", but you don't need to know about that: ", " the sample just won't load if that's not the case)"), div({ style: "margin-top: 0.5em; margin-bottom: 0.5em;" }, details(summary("Why arbitrary URLs?"), a({ href: "https://pandoras-box-archive.neptendo.repl.co/" }, "A certain BeepBox mod"), " did this with one central server, but it went down, taking down", " the samples with it, though thankfully it got archived.", " This is always an issue with servers: it may run out of space,", " stop working, and so on. With arbitrary URLs, you can always ", " change them to different ones if they stop working.")), div({ style: "margin-top: 0.5em; margin-bottom: 0.5em;" }, "As for where to upload your samples, here are some suggestions:", ul({ style: "text-align: left;" }, li(a({ href: "https://filegarden.com" }, "File Garden")), li(a({ href: "https://github.com/" }, "Github")), li(a({ href: "https://www.dropbox.com" }, "Dropbox"), " (domain needs to be ", code("https://dl.dropboxusercontent.com"), ")"))), div({ style: "margin-top: 0.5em; margin-bottom: 0.5em;" }, "Static website hosting services may also work (such as ", a({ href: "https://pages.github.com" }, "GitHub Pages"), ")", " but those require a bit more setup."), div({ style: "margin-top: 0.5em; margin-bottom: 1em;" }, "Finally, if have a soundfont you'd like to get samples from, consider using this ", a({ href: "./sample_extractor.html", target: "_blank" }, "sample extractor"), "!"), div({ style: "display: flex; flex-direction: row-reverse; justify-content: space-between; margin-top: 0.5em;" }, this._closeInstructionsButton));
+        this._addSamplesArea = div({ style: "overflow-y: auto;" }, div({ class: "promptTitle" }, h2({ class: "samplesExt", style: "text-align: inherit;" }, ""), h2({ class: "samplesTitle", style: "margin-bottom: 0.5em;" }, "Add Samples")), div({ style: "display: flex; flex-direction: column; align-items: center; margin-bottom: 0.5em;" }, this._description, div({ style: "width: 100%; max-height: 450px; overflow-y: scroll;" }, this._entryContainer), this._addSamplesAreaBottom), div({ style: "display: flex; flex-direction: row-reverse; justify-content: space-between;" }, this._okayButton));
+        this._bulkAddTextarea = textarea({
+            style: "width: 100%; height: 100%; resize: none; box-sizing: border-box;",
+        });
+        this._bulkAddConfirmButton = button({ style: "height: auto; min-height: var(--button-size); width: 100%;" }, "Add");
+        this._bulkAddArea = div({ style: "display: none; overflow-y: auto;" }, h2({ style: "margin-bottom: 0.5em;" }, "Add Multiple Samples"), div({ style: "display: flex; flex-direction: column; align-items: center;" }, div(`Add one URL per line. Remember that you can only have ${this._maxSamples} samples!`), div({ style: `color: ${ColorConfig.secondaryText}` }, "(This supports the syntax used to store samples in the song URLs as well)"), div({ style: "width: 100%; height: 250px; margin-top: 0.5em; margin-bottom: 0.5em;" }, this._bulkAddTextarea)), div({ style: "display: flex; flex-direction: row-reverse; justify-content: space-between;" }, this._bulkAddConfirmButton));
+        this.container = div({ class: "prompt noSelection", style: "width: 450px; max-height: calc(100% - 100px);" }, this._addSamplesArea, this._bulkAddArea, this._instructionsArea, this._cancelButton);
+        this.cleanUp = () => {
+            while (this._entryContainer.firstChild !== null) {
+                this._entryContainer.removeChild(this._entryContainer.firstChild);
+            }
+            this._addSampleButton.removeEventListener("click", this._whenAddSampleClicked);
+            this._addMultipleSamplesButton.removeEventListener("click", this._whenAddMultipleSamplesClicked);
+            this._bulkAddConfirmButton.removeEventListener("click", this._whenBulkAddConfirmClicked);
+            this._okayButton.removeEventListener("click", this._saveChanges);
+            this._cancelButton.removeEventListener("click", this._close);
+            this._instructionsLink.removeEventListener("click", this._whenInstructionsLinkClicked);
+            this._closeInstructionsButton.removeEventListener("click", this._whenCloseInstructionsButtonClicked);
+        };
+        this._close = () => {
+            this._doc.prompt = null;
+            this._doc.undo();
+            if (this._doReload == true) {
+                this._saveChanges();
+            }
+        };
+        this._saveChanges = () => {
+            const urlData = this._generateURLData();
+            EditorConfig.customSamples = urlData.split("|").filter(x => x !== "");
+            Config.willReloadForCustomSamples = true;
+            window.location.hash = this._doc.song.toBase64String();
+            setTimeout(() => { location.reload(); }, 50);
+        };
+        this._whenAddSampleClicked = (event) => {
+            const entryIndex = this._entries.length;
+            this._entries.push({
+                url: "",
+                sampleRate: 44100,
+                rootKey: 60,
+                percussion: false,
+                chipWaveLoopStart: null,
+                chipWaveLoopEnd: null,
+                chipWaveStartOffset: null,
+                chipWaveLoopMode: null,
+                chipWavePlayBackwards: false,
+            });
+            this._entryOptionsDisplayStates[entryIndex] = false;
+            this._reconfigureAddSampleButton();
+            this._render(true);
+            this._doReload = true;
+        };
+        this._whenAddMultipleSamplesClicked = (event) => {
+            this._addSamplesArea.style.display = "none";
+            this._bulkAddArea.style.display = "";
+            this._bulkAddTextarea.value = "";
+        };
+        this._whenInstructionsLinkClicked = (event) => {
+            event.preventDefault();
+            this._addSamplesArea.style.display = "none";
+            this._instructionsArea.style.display = "";
+        };
+        this._whenCloseInstructionsButtonClicked = (event) => {
+            this._addSamplesArea.style.display = "";
+            this._instructionsArea.style.display = "none";
+        };
+        this._whenBulkAddConfirmClicked = (event) => {
+            this._addSamplesArea.style.display = "";
+            this._bulkAddArea.style.display = "none";
+            const parsed = this._parseURLs(this._bulkAddTextarea.value
+                .replace(/\n/g, "|")
+                .split("|")
+                .map((x) => decodeURIComponent(x.trim()))
+                .filter((x) => x !== ""), false);
+            const seen = new Map();
+            for (const entry of this._entries) {
+                seen.set(entry.url, true);
+            }
+            for (const entry of parsed.entries) {
+                if (this._entries.length >= this._maxSamples)
+                    break;
+                if (seen.has(entry.url))
+                    continue;
+                seen.set(entry.url, true);
+                const entryIndex = this._entries.length;
+                this._entries.push(entry);
+                this._entryOptionsDisplayStates[entryIndex] = false;
+            }
+            this._reconfigureAddSampleButton();
+            this._render(false);
+            this._doReload = true;
+        };
+        this._whenOptionsAreToggled = (event) => {
+            const element = event.target;
+            const entryIndex = +(element.dataset.index);
+            if (element.open) {
+                this._entryOptionsDisplayStates[entryIndex] = true;
+            }
+            else {
+                this._entryOptionsDisplayStates[entryIndex] = false;
+            }
+        };
+        this._whenURLChanges = (event) => {
+            var _a, _b;
+            const element = event.target;
+            const entryIndex = +(element.dataset.index);
+            this._entries[entryIndex].url = element.value;
+            const sampleNameElement = (_b = (_a = element.parentNode) === null || _a === void 0 ? void 0 : _a.parentNode) === null || _b === void 0 ? void 0 : _b.querySelector(".add-sample-prompt-sample-name");
+            if (sampleNameElement != null) {
+                const sampleName = this._getSampleName(this._entries[entryIndex]);
+                sampleNameElement.innerText = sampleName;
+                sampleNameElement.title = sampleName;
+            }
+            this._doReload = true;
+        };
+        this._whenSampleRateChanges = (event) => {
+            const element = event.target;
+            const entryIndex = +(element.dataset.index);
+            const value = clamp(8000, 96000 + 1, parseFloatWithDefault(element.value, 44100));
+            this._entries[entryIndex].sampleRate = value;
+        };
+        this._whenRootKeyChanges = (event) => {
+            var _a, _b;
+            const element = event.target;
+            const entryIndex = +(element.dataset.index);
+            const value = parseFloatWithDefault(element.value, 60);
+            this._entries[entryIndex].rootKey = value;
+            const rootKeyDisplay = (_b = (_a = element.parentNode) === null || _a === void 0 ? void 0 : _a.parentNode) === null || _b === void 0 ? void 0 : _b.querySelector(".add-sample-prompt-root-key-display");
+            if (rootKeyDisplay != null) {
+                const noteName = this._noteNameFromPitchNumber(this._entries[entryIndex].rootKey);
+                if (noteName !== "") {
+                    rootKeyDisplay.innerText = `(${noteName})`;
+                }
+            }
+        };
+        this._whenPercussionChanges = (event) => {
+            const element = event.target;
+            const entryIndex = +(element.dataset.index);
+            this._entries[entryIndex].percussion = element.checked ? true : false;
+        };
+        this._whenChipWaveLoopStartChanges = (event) => {
+            const element = event.target;
+            const entryIndex = +(element.dataset.index);
+            const value = parseIntWithDefault(element.value, null);
+            this._entries[entryIndex].chipWaveLoopStart = value;
+        };
+        this._whenChipWaveLoopEndChanges = (event) => {
+            const element = event.target;
+            const entryIndex = +(element.dataset.index);
+            const value = parseIntWithDefault(element.value, null);
+            this._entries[entryIndex].chipWaveLoopEnd = value;
+        };
+        this._whenChipWaveStartOffsetChanges = (event) => {
+            const element = event.target;
+            const entryIndex = +(element.dataset.index);
+            const value = parseIntWithDefault(element.value, null);
+            this._entries[entryIndex].chipWaveStartOffset = value;
+        };
+        this._whenChipWaveLoopModeChanges = (event) => {
+            const element = event.target;
+            const entryIndex = +(element.dataset.index);
+            const newValue = +element.value;
+            if (newValue === -1) {
+                this._entries[entryIndex].chipWaveLoopMode = null;
+            }
+            else {
+                this._entries[entryIndex].chipWaveLoopMode = newValue;
+            }
+        };
+        this._whenChipWavePlayBackwardsChanges = (event) => {
+            const element = event.target;
+            const entryIndex = +(element.dataset.index);
+            const newValue = element.checked;
+            this._entries[entryIndex].chipWavePlayBackwards = newValue;
+        };
+        this._whenCopyLinkPresetClicked = (event) => {
+            const element = event.target;
+            const entryIndex = +(element.dataset.index);
+            this._copyTextToClipboard(this._generateURLDataForEntry(this._entries[entryIndex]));
+        };
+        this._whenRemoveSampleClicked = (event) => {
+            const element = event.target;
+            const entryIndex = +(element.dataset.index);
+            this._entryOptionsDisplayStates[entryIndex] = false;
+            this._entries.splice(entryIndex, 1);
+            this._reconfigureAddSampleButton();
+            this._render(false);
+        };
+        this._whenMoveSampleUpClicked = (event) => {
+            const element = event.target;
+            const entryIndex = +(element.dataset.index);
+            const upEntryIndex = entryIndex - 1;
+            if (this._entries.length >= 2 && upEntryIndex >= 0) {
+                const upEntry = this._entries[upEntryIndex];
+                const entry = this._entries[entryIndex];
+                const upEntryOptionsVisibility = this._entryOptionsDisplayStates[upEntryIndex];
+                const entryOptionsVisibility = this._entryOptionsDisplayStates[entryIndex];
+                this._entries[upEntryIndex] = entry;
+                this._entries[entryIndex] = upEntry;
+                this._entryOptionsDisplayStates[upEntryIndex] = entryOptionsVisibility;
+                this._entryOptionsDisplayStates[entryIndex] = upEntryOptionsVisibility;
+                this._render(false);
+            }
+        };
+        this._whenMoveSampleDownClicked = (event) => {
+            const element = event.target;
+            const entryIndex = +(element.dataset.index);
+            const downEntryIndex = entryIndex + 1;
+            if (this._entries.length >= 2 && downEntryIndex < this._entries.length) {
+                const downEntry = this._entries[downEntryIndex];
+                const entry = this._entries[entryIndex];
+                const downEntryOptionsVisibility = this._entryOptionsDisplayStates[downEntryIndex];
+                const entryOptionsVisibility = this._entryOptionsDisplayStates[entryIndex];
+                this._entries[downEntryIndex] = entry;
+                this._entries[entryIndex] = downEntry;
+                this._entryOptionsDisplayStates[downEntryIndex] = entryOptionsVisibility;
+                this._entryOptionsDisplayStates[entryIndex] = downEntryOptionsVisibility;
+                this._render(false);
+            }
+        };
+        this._reconfigureAddSampleButton = () => {
+            if (this._entries.length >= this._maxSamples) {
+                this._addSampleButton.style.display = "none";
+            }
+            else {
+                this._addSampleButton.style.display = "";
+            }
+        };
+        this._parseURLs = (urls, parseOldSyntax) => {
+            function sliceForSampleRate(url) {
+                const newUrl = url.slice(0, url.indexOf(","));
+                const sampleRate = clamp(8000, 96000 + 1, parseFloatWithDefault(url.slice(url.indexOf(",") + 1), 44100));
+                return [newUrl, sampleRate];
+            }
+            function sliceForRootKey(url) {
+                const newUrl = url.slice(0, url.indexOf("!"));
+                const rootKey = parseFloatWithDefault(url.slice(url.indexOf("!") + 1), 60);
+                return [newUrl, rootKey];
+            }
+            let useLegacySamples = false;
+            let useNintariboxSamples = false;
+            let useMarioPaintboxSamples = false;
+            const parsedEntries = [];
+            for (const url of urls) {
+                if (url === "")
+                    continue;
+                if (url.toLowerCase() === "legacysamples") {
+                    if (!useLegacySamples) {
+                        parsedEntries.push({
+                            url: "legacySamples",
+                            sampleRate: 44100,
+                            rootKey: 60,
+                            percussion: false,
+                            chipWaveLoopStart: null,
+                            chipWaveLoopEnd: null,
+                            chipWaveStartOffset: null,
+                            chipWaveLoopMode: null,
+                            chipWavePlayBackwards: false,
+                        });
+                    }
+                    useLegacySamples = true;
+                }
+                else if (url.toLowerCase() === "nintariboxsamples") {
+                    if (!useNintariboxSamples) {
+                        parsedEntries.push({
+                            url: "nintariboxSamples",
+                            sampleRate: 44100,
+                            rootKey: 60,
+                            percussion: false,
+                            chipWaveLoopStart: null,
+                            chipWaveLoopEnd: null,
+                            chipWaveStartOffset: null,
+                            chipWaveLoopMode: null,
+                            chipWavePlayBackwards: false,
+                        });
+                    }
+                    useNintariboxSamples = true;
+                }
+                else if (url.toLowerCase() === "mariopaintboxsamples") {
+                    if (!useMarioPaintboxSamples) {
+                        parsedEntries.push({
+                            url: "marioPaintboxSamples",
+                            sampleRate: 44100,
+                            rootKey: 60,
+                            percussion: false,
+                            chipWaveLoopStart: null,
+                            chipWaveLoopEnd: null,
+                            chipWaveStartOffset: null,
+                            chipWaveLoopMode: null,
+                            chipWavePlayBackwards: false,
+                        });
+                    }
+                    useMarioPaintboxSamples = true;
+                }
+                else {
+                    let urlSliced = url;
+                    let sampleRate = 44100;
+                    let rootKey = 60;
+                    let percussion = false;
+                    let chipWaveLoopStart = null;
+                    let chipWaveLoopEnd = null;
+                    let chipWaveStartOffset = null;
+                    let chipWaveLoopMode = null;
+                    let chipWavePlayBackwards = false;
+                    let optionsStartIndex = url.indexOf("!");
+                    let optionsEndIndex = -1;
+                    let parsedSampleOptions = false;
+                    if (optionsStartIndex === 0) {
+                        optionsEndIndex = url.indexOf("!", optionsStartIndex + 1);
+                        if (optionsEndIndex !== -1) {
+                            const rawOptions = url.slice(optionsStartIndex + 1, optionsEndIndex).split(",");
+                            for (const rawOption of rawOptions) {
+                                const optionCode = rawOption.charAt(0);
+                                const optionData = rawOption.slice(1, rawOption.length);
+                                if (optionCode === "s") {
+                                    sampleRate = clamp(8000, 96000 + 1, parseFloatWithDefault(optionData, 44100));
+                                }
+                                else if (optionCode === "r") {
+                                    rootKey = parseFloatWithDefault(optionData, 60);
+                                }
+                                else if (optionCode === "p") {
+                                    percussion = true;
+                                }
+                                else if (optionCode === "a") {
+                                    chipWaveLoopStart = parseIntWithDefault(optionData, null);
+                                }
+                                else if (optionCode === "b") {
+                                    chipWaveLoopEnd = parseIntWithDefault(optionData, null);
+                                }
+                                else if (optionCode === "c") {
+                                    chipWaveStartOffset = parseIntWithDefault(optionData, null);
+                                }
+                                else if (optionCode === "d") {
+                                    chipWaveLoopMode = parseIntWithDefault(optionData, null);
+                                    if (chipWaveLoopMode != null) {
+                                        chipWaveLoopMode = clamp(0, 3 + 1, chipWaveLoopMode);
+                                    }
+                                }
+                                else if (optionCode === "e") {
+                                    chipWavePlayBackwards = true;
+                                }
+                            }
+                            urlSliced = url.slice(optionsEndIndex + 1, url.length);
+                            parsedSampleOptions = true;
+                        }
+                    }
+                    if (parseOldSyntax) {
+                        if (!parsedSampleOptions) {
+                            if (url.indexOf("@") != -1) {
+                                urlSliced = url.replaceAll("@", "");
+                                percussion = true;
+                            }
+                            if (url.indexOf(",") != -1 && url.indexOf("!") != -1) {
+                                if (url.indexOf(",") < url.indexOf("!")) {
+                                    [urlSliced, rootKey] = sliceForRootKey(urlSliced);
+                                    [urlSliced, sampleRate] = sliceForSampleRate(urlSliced);
+                                }
+                                else {
+                                    [urlSliced, sampleRate] = sliceForSampleRate(urlSliced);
+                                    [urlSliced, rootKey] = sliceForRootKey(urlSliced);
+                                }
+                            }
+                            else {
+                                if (url.indexOf(",") != -1) {
+                                    [urlSliced, sampleRate] = sliceForSampleRate(urlSliced);
+                                }
+                                if (url.indexOf("!") != -1) {
+                                    [urlSliced, rootKey] = sliceForRootKey(urlSliced);
+                                }
+                            }
+                        }
+                    }
+                    parsedEntries.push({
+                        url: urlSliced,
+                        sampleRate: sampleRate,
+                        rootKey: rootKey,
+                        percussion: percussion,
+                        chipWaveLoopStart: chipWaveLoopStart,
+                        chipWaveLoopEnd: chipWaveLoopEnd,
+                        chipWaveStartOffset: chipWaveStartOffset,
+                        chipWaveLoopMode: chipWaveLoopMode,
+                        chipWavePlayBackwards: chipWavePlayBackwards,
+                    });
+                }
+            }
+            return { entries: parsedEntries };
+        };
+        this._generateURLDataForEntry = (entry) => {
+            const url = entry.url.trim();
+            const sampleRate = entry.sampleRate;
+            const rootKey = entry.rootKey;
+            const percussion = entry.percussion;
+            const chipWaveLoopStart = entry.chipWaveLoopStart;
+            const chipWaveLoopEnd = entry.chipWaveLoopEnd;
+            const chipWaveStartOffset = entry.chipWaveStartOffset;
+            const chipWaveLoopMode = entry.chipWaveLoopMode;
+            const chipWavePlayBackwards = entry.chipWavePlayBackwards;
+            const urlInLowerCase = url.toLowerCase();
+            const isBundledSamplePack = (urlInLowerCase === "legacysamples"
+                || urlInLowerCase === "nintariboxsamples"
+                || urlInLowerCase === "mariopaintboxsamples");
+            const options = [];
+            if (sampleRate !== 44100)
+                options.push("s" + sampleRate);
+            if (rootKey !== 60)
+                options.push("r" + rootKey);
+            if (percussion)
+                options.push("p");
+            if (chipWaveLoopStart != null)
+                options.push("a" + chipWaveLoopStart);
+            if (chipWaveLoopEnd != null)
+                options.push("b" + chipWaveLoopEnd);
+            if (chipWaveStartOffset != null)
+                options.push("c" + chipWaveStartOffset);
+            if (chipWaveLoopMode != null)
+                options.push("d" + chipWaveLoopMode);
+            if (chipWavePlayBackwards)
+                options.push("e");
+            if (isBundledSamplePack || options.length <= 0) {
+                return url;
+            }
+            else {
+                return "!" + options.join(",") + "!" + url;
+            }
+        };
+        this._generateURLData = () => {
+            let output = "";
+            for (const entry of this._entries) {
+                const url = entry.url.trim();
+                if (url === "")
+                    continue;
+                output += "|" + this._generateURLDataForEntry(entry);
+            }
+            return output;
+        };
+        this._getSampleName = (entry) => {
+            try {
+                const parsedUrl = new URL(entry.url);
+                return decodeURIComponent(parsedUrl.pathname.replace(/^([^\/]*\/)+/, ""));
+            }
+            catch (error) {
+                return entry.url;
+            }
+        };
+        this._noteNameFromPitchNumber = (n) => {
+            function wrap(x, b) {
+                return (x % b + b) % b;
+            }
+            n = Math.floor(n) - 12;
+            const pitchNameIndex = wrap(n + Config.keys[this._doc.song.key].basePitch, Config.pitchesPerOctave);
+            let pitch = "";
+            if (Config.keys[pitchNameIndex].isWhiteKey) {
+                pitch = Config.keys[pitchNameIndex].name;
+            }
+            else {
+                const shiftDir = Config.blackKeyNameParents[wrap(n, Config.pitchesPerOctave)];
+                pitch = Config.keys[wrap(pitchNameIndex + Config.pitchesPerOctave + shiftDir, Config.pitchesPerOctave)].name;
+                if (shiftDir == 1) {
+                    pitch += "♭";
+                }
+                else if (shiftDir == -1) {
+                    pitch += "♯";
+                }
+            }
+            pitch += Math.floor(n / Config.pitchesPerOctave);
+            return pitch;
+        };
+        this._render = (scrollToBottom) => {
+            while (this._entryContainer.firstChild !== null) {
+                this._entryContainer.removeChild(this._entryContainer.firstChild);
+            }
+            for (let entryIndex = 0; entryIndex < this._entries.length; entryIndex++) {
+                const canMoveUp = this._entries.length >= 2 && entryIndex > 0;
+                const canMoveDown = this._entries.length >= 2 && entryIndex < this._entries.length - 1;
+                const entry = this._entries[entryIndex];
+                const optionsVisible = Boolean(this._entryOptionsDisplayStates[entryIndex]);
+                const urlInput = input({ style: "flex-grow: 1; margin-left: 1em; width: 100%;", value: entry.url });
+                const sampleRateStepper = input({ style: "flex-grow: 1; margin-left: 1em; width: 100%;", type: "number", value: "" + entry.sampleRate, min: "8000", max: "96000", step: "1" });
+                const rootKeyStepper = input({ style: "flex-grow: 1; margin-left: 1em; width: 100%;", type: "number", value: "" + entry.rootKey, min: "0", max: Config.maxPitch + Config.pitchesPerOctave, step: "1" });
+                const rootKeyDisplay = span({ class: "add-sample-prompt-root-key-display", style: "margin-left: 0.4em; width: 3em; text-align: left; text-overflow: ellipsis; overflow: hidden; flex-shrink: 0;" }, `(${this._noteNameFromPitchNumber(entry.rootKey)})`);
+                const percussionBox = input({ style: "width: 1em; margin-left: 1em;", type: "checkbox" });
+                const chipWaveLoopStartStepper = input({ style: "flex-grow: 1; margin-left: 1em; width: 100%;", type: "number", value: "" + (entry.chipWaveLoopStart != null ? entry.chipWaveLoopStart : ""), min: "0", step: "1" });
+                const chipWaveLoopEndStepper = input({ style: "flex-grow: 1; margin-left: 1em; width: 100%;", type: "number", value: "" + (entry.chipWaveLoopEnd != null ? entry.chipWaveLoopEnd : ""), min: "0", step: "1" });
+                const chipWaveStartOffsetStepper = input({ style: "flex-grow: 1; margin-left: 1em; width: 100%;", type: "number", value: "" + (entry.chipWaveStartOffset != null ? entry.chipWaveStartOffset : ""), min: "0", step: "1" });
+                const chipWaveLoopModeSelect = select({ style: "width: 100%; flex-grow: 1; margin-left: 0.5em;" }, option({ value: -1 }, ""), option({ value: 0 }, "Loop"), option({ value: 1 }, "Ping-Pong"), option({ value: 2 }, "Play Once"), option({ value: 3 }, "Play Loop Once"));
+                if (entry.chipWaveLoopMode != null) {
+                    chipWaveLoopModeSelect.value = "" + entry.chipWaveLoopMode;
+                }
+                const chipWavePlayBackwardsBox = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-left: auto; margin-right: auto;" });
+                chipWavePlayBackwardsBox.checked = entry.chipWavePlayBackwards;
+                const sampleName = this._getSampleName(entry);
+                percussionBox.checked = entry.percussion;
+                const copyLinkPresetButton = button({ style: "height: auto; min-height: var(--button-size);", title: "For use with \"Add multiple samples\"" }, "Copy link preset");
+                const removeButton = button({ style: "height: auto; min-height: var(--button-size); margin-left: 0.5em;" }, "Remove");
+                const moveUpButton = button({ style: "height: auto; min-height: var(--button-size); margin-left: 0.5em;" }, SVG.svg({ width: "16", height: "16", viewBox: "-13 -14 26 26", "pointer-events": "none", style: "width: 100%; height: 100%;" }, SVG.path({ d: "M -6 6 L 0 -6 L 6 6 z", fill: ColorConfig.primaryText })));
+                const moveDownButton = button({ style: "height: auto; min-height: var(--button-size); margin-left: 0.5em;" }, SVG.svg({ width: "16", height: "16", viewBox: "-13 -14 26 26", "pointer-events": "none", style: "width: 100%; height: 100%;" }, SVG.path({ d: "M -6 -6 L 6 -6 L 0 6 z", fill: ColorConfig.primaryText })));
+                const optionsContainer = details({ open: optionsVisible, style: "margin-bottom: 2em; margin-top: 1em;" }, summary({ style: "margin-bottom: 1em;" }, "Options"), div({ style: "display: flex; flex-direction: row; align-items: center; justify-content: flex-end; margin-bottom: 0.5em;" }, div({ style: `flex-shrink: 0; :text-align: right; color: ${ColorConfig.primaryText};` }, span({ title: "What rate to resample to" }, "Sample rate")), sampleRateStepper), div({ style: "display: flex; flex-direction: row; align-items: center; justify-content: flex-end; margin-bottom: 0.5em;" }, div({ style: `text-align: right; color: ${ColorConfig.primaryText}; flex-shrink: 0;` }, span({ title: "Pitch where the sample is played as-is" }, "Root key")), rootKeyDisplay, rootKeyStepper), div({ style: "display: flex; flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 0.5em;" }, div({ style: `text-align: right; color: ${ColorConfig.primaryText};` }, "Percussion (pitch doesn't change with key)"), percussionBox), div({ style: "display: flex; flex-direction: row; align-items: center; justify-content: flex-end; margin-bottom: 0.5em;" }, div({ style: `flex-shrink: 0; text-align: right; color: ${ColorConfig.primaryText};` }, span({ title: "Applies to the \"Loop Start\" loop control option of the preset created for this sample" }, "Loop Start")), chipWaveLoopStartStepper), div({ style: "display: flex; flex-direction: row; align-items: center; justify-content: flex-end; margin-bottom: 0.5em;" }, div({ style: `flex-shrink: 0; text-align: right; color: ${ColorConfig.primaryText};` }, span({ title: "Applies to the \"Loop End\" loop control option of the preset created for this sample" }, "Loop End")), chipWaveLoopEndStepper), div({ style: "display: flex; flex-direction: row; align-items: center; justify-content: flex-end; margin-bottom: 0.5em;" }, div({ style: `flex-shrink: 0; text-align: right; color: ${ColorConfig.primaryText};` }, span({ title: "Applies to the \"Offset\" loop control option of the preset created for this sample" }, "Sample Start Offset")), chipWaveStartOffsetStepper), div({ style: "display: flex; flex-direction: row; align-items: center; justify-content: flex-end; margin-bottom: 0.5em;" }, div({ style: `flex-shrink: 0; text-align: right; color: ${ColorConfig.primaryText};` }, span({ title: "Applies to the \"Loop Mode\" loop control option of the preset created for this sample" }, "Loop Mode")), chipWaveLoopModeSelect), div({ style: "display: flex; flex-direction: row; align-items: center; justify-content: flex-end; margin-bottom: 0.5em;" }, div({ style: `flex-shrink: 0; text-align: right; color: ${ColorConfig.primaryText};` }, span({ title: "Applies to the \"Backwards\" loop control option of the preset created for this sample" }, "Backwards")), chipWavePlayBackwardsBox));
+                urlInput.dataset.index = "" + entryIndex;
+                sampleRateStepper.dataset.index = "" + entryIndex;
+                rootKeyStepper.dataset.index = "" + entryIndex;
+                percussionBox.dataset.index = "" + entryIndex;
+                chipWaveLoopStartStepper.dataset.index = "" + entryIndex;
+                chipWaveLoopEndStepper.dataset.index = "" + entryIndex;
+                chipWaveStartOffsetStepper.dataset.index = "" + entryIndex;
+                chipWaveLoopModeSelect.dataset.index = "" + entryIndex;
+                chipWavePlayBackwardsBox.dataset.index = "" + entryIndex;
+                copyLinkPresetButton.dataset.index = "" + entryIndex;
+                removeButton.dataset.index = "" + entryIndex;
+                moveUpButton.dataset.index = "" + entryIndex;
+                moveDownButton.dataset.index = "" + entryIndex;
+                optionsContainer.dataset.index = "" + entryIndex;
+                const bottomButtons = div({ style: "display: flex; flex-direction: row; align-items: center; justify-content: flex-end;" }, copyLinkPresetButton, removeButton);
+                if (canMoveUp) {
+                    bottomButtons.appendChild(moveUpButton);
+                }
+                if (canMoveDown) {
+                    bottomButtons.appendChild(moveDownButton);
+                }
+                const entryElement = div({ style: `padding: 0.6em; margin: 0.4em; border: 1px solid ${ColorConfig.uiWidgetBackground}; border-radius: 4px;` }, div({
+                    class: "add-sample-prompt-sample-name",
+                    style: `margin-bottom: 0.5em; color: ${ColorConfig.secondaryText}; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;`,
+                    title: sampleName,
+                }, sampleName), div({ style: "display: flex; flex-direction: row; align-items: center; justify-content: flex-end; margin-bottom: 0.5em;" }, div({ style: `text-align: right; color: ${ColorConfig.primaryText};` }, "URL"), urlInput), optionsContainer, bottomButtons);
+                optionsContainer.addEventListener("toggle", this._whenOptionsAreToggled);
+                urlInput.addEventListener("change", this._whenURLChanges);
+                sampleRateStepper.addEventListener("change", this._whenSampleRateChanges);
+                rootKeyStepper.addEventListener("change", this._whenRootKeyChanges);
+                percussionBox.addEventListener("change", this._whenPercussionChanges);
+                chipWaveLoopStartStepper.addEventListener("change", this._whenChipWaveLoopStartChanges);
+                chipWaveLoopEndStepper.addEventListener("change", this._whenChipWaveLoopEndChanges);
+                chipWaveStartOffsetStepper.addEventListener("change", this._whenChipWaveStartOffsetChanges);
+                chipWaveLoopModeSelect.addEventListener("change", this._whenChipWaveLoopModeChanges);
+                chipWavePlayBackwardsBox.addEventListener("change", this._whenChipWavePlayBackwardsChanges);
+                copyLinkPresetButton.addEventListener("click", this._whenCopyLinkPresetClicked);
+                removeButton.addEventListener("click", this._whenRemoveSampleClicked);
+                if (canMoveUp) {
+                    moveUpButton.addEventListener("click", this._whenMoveSampleUpClicked);
+                }
+                if (canMoveDown) {
+                    moveDownButton.addEventListener("click", this._whenMoveSampleDownClicked);
+                }
+                this._entryContainer.appendChild(entryElement);
+                const thisIsTheLastElement = entryIndex === this._entries.length - 1;
+                if (scrollToBottom && thisIsTheLastElement) {
+                    entryElement.scrollIntoView({ "block": "nearest", "inline": "nearest" });
+                }
+            }
+        };
+        this._doc = _doc;
+        if (EditorConfig.customSamples != null) {
+            const parsed = this._parseURLs(EditorConfig.customSamples, false);
+            this._entries = parsed.entries;
+        }
+        this._addSampleButton.addEventListener("click", this._whenAddSampleClicked);
+        this._addMultipleSamplesButton.addEventListener("click", this._whenAddMultipleSamplesClicked);
+        this._bulkAddConfirmButton.addEventListener("click", this._whenBulkAddConfirmClicked);
+        this._okayButton.addEventListener("click", this._saveChanges);
+        this._cancelButton.addEventListener("click", this._close);
+        this._instructionsLink.addEventListener("click", this._whenInstructionsLinkClicked);
+        this._closeInstructionsButton.addEventListener("click", this._whenCloseInstructionsButtonClicked);
+        this._reconfigureAddSampleButton();
+        this._render(false);
+    }
+    _copyTextToClipboard(text) {
+        let nav;
+        nav = navigator;
+        if (nav.clipboard && nav.clipboard.writeText) {
+            nav.clipboard.writeText(text).catch(() => {
+                window.prompt("Copy to clipboard:", text);
+            });
+            return;
+        }
+        const textField = document.createElement("textarea");
+        textField.textContent = text;
+        document.body.appendChild(textField);
+        textField.select();
+        const succeeded = document.execCommand("copy");
+        textField.remove();
+        this.container.focus({ preventScroll: true });
+        if (!succeeded)
+            window.prompt("Copy this:", text);
+    }
+}
+//# sourceMappingURL=AddSamplesPrompt.js.map

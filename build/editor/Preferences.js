@@ -1,0 +1,122 @@
+import { Config } from "../synth/SynthConfig";
+export class Preferences {
+    constructor() {
+        this.volume = 75;
+        this.visibleOctaves = Preferences.defaultVisibleOctaves;
+        this.reload();
+    }
+    reload() {
+        this.autoPlay = window.localStorage.getItem("autoPlay") == "true";
+        this.autoFollow = window.localStorage.getItem("autoFollow") != "false";
+        this.enableNotePreview = window.localStorage.getItem("enableNotePreview") != "false";
+        this.showFifth = window.localStorage.getItem("showFifth") == "true";
+        this.showThird = window.localStorage.getItem("showThird") == "true";
+        this.advancedColorScheme = window.localStorage.getItem("advancedColorScheme") == "true";
+        this.notesOutsideScale = window.localStorage.getItem("notesOutsideScale") == "true";
+        this.showLetters = window.localStorage.getItem("showLetters") == "true";
+        this.showChannels = window.localStorage.getItem("showChannels") == "true";
+        this.showScrollBar = window.localStorage.getItem("showScrollBar") == "true";
+        this.alwaysFineNoteVol = window.localStorage.getItem("alwaysFineNoteVol") == "true";
+        this.displayVolumeBar = window.localStorage.getItem("displayVolumeBar") == "true";
+        this.instrumentCopyPaste = window.localStorage.getItem("instrumentCopyPaste") == "true";
+        this.instrumentImportExport = window.localStorage.getItem("instrumentImportExport") == "true";
+        this.enableChannelMuting = window.localStorage.getItem("enableChannelMuting") == "true";
+        this.displayBrowserUrl = window.localStorage.getItem("displayBrowserUrl") != "false";
+        this.pressControlForShortcuts = window.localStorage.getItem("pressControlForShortcuts") == "true";
+        this.enableMidi = window.localStorage.getItem("enableMidi") != "false";
+        this.showRecordButton = window.localStorage.getItem("showRecordButton") == "true";
+        this.snapRecordedNotesToRhythm = window.localStorage.getItem("snapRecordedNotesToRhythm") == "true";
+        this.ignorePerformedNotesNotInScale = window.localStorage.getItem("ignorePerformedNotesNotInScale") == "true";
+        this.metronomeCountIn = window.localStorage.getItem("metronomeCountIn") != "false";
+        this.metronomeWhileRecording = window.localStorage.getItem("metronomeWhileRecording") != "false";
+        this.showOscilloscope = window.localStorage.getItem("showOscilloscope") != "false";
+        this.showSampleLoadingStatus = window.localStorage.getItem("showSampleLoadingStatus") != "false";
+        this.showDescription = window.localStorage.getItem("showDescription") != "false";
+        this.notesFlashWhenPlayed = window.localStorage.getItem("notesFlashWhenPlayed") != "false";
+        this.showInstrumentScrollbars = window.localStorage.getItem("showInstrumentScrollbars") == "true";
+        this.closePromptByClickoff = window.localStorage.getItem("closePromptByClickoff") != "false";
+        this.frostedGlassBackground = window.localStorage.getItem("frostedGlassBackground") == "true";
+        this.displayShortcutButtons = window.localStorage.getItem("displayShortcutButtons") == "true";
+        this.instrumentSettingsSimplifier = window.localStorage.getItem("instrumentSettingsSimplifier") == "true";
+        this.oldMobileLayout = window.localStorage.getItem("oldMobileLayout") == "true";
+        this.oldModNotes = window.localStorage.getItem("oldModNotes") == "true";
+        this.selectionCounter = window.localStorage.getItem("selectionCounter") != "false";
+        this.promptSongDetails = window.localStorage.getItem("promptSongDetails") != "false";
+        this.keyboardLayout = window.localStorage.getItem("keyboardLayout") || "wickiHayden";
+        this.bassOffset = (+window.localStorage.getItem("bassOffset")) || 0;
+        this.layout = window.localStorage.getItem("layout") || "small";
+        this.colorTheme = window.localStorage.getItem("colorTheme") || "Ghost House 2";
+        this.customTheme = window.localStorage.getItem("customTheme");
+        this.customTheme2 = window.localStorage.getItem("customTheme2");
+        this.visibleOctaves = (window.localStorage.getItem("visibleOctaves") >>> 0) || Preferences.defaultVisibleOctaves;
+        const defaultScale = Config.scales.dictionary[window.localStorage.getItem("defaultScale")];
+        this.defaultScale = (defaultScale != undefined) ? defaultScale.index : 0;
+        if (window.localStorage.getItem("volume") != null) {
+            this.volume = Math.min(window.localStorage.getItem("volume") >>> 0, 75);
+        }
+        if (window.localStorage.getItem("fullScreen") != null) {
+            if (window.localStorage.getItem("fullScreen") == "true")
+                this.layout = "long";
+            window.localStorage.removeItem("fullScreen");
+        }
+        this.customFont = window.localStorage.getItem("customFontName") || "none";
+        this.customBG = window.localStorage.getItem("backgroundName") || "none";
+        this.customIcons = window.localStorage.getItem("customIconsName") || "none";
+        this.customBorder = window.localStorage.getItem("customBorderName") || "none";
+        this.customCursor = window.localStorage.getItem("customIconsName") || "none";
+    }
+    save() {
+        window.localStorage.setItem("autoPlay", this.autoPlay ? "true" : "false");
+        window.localStorage.setItem("autoFollow", this.autoFollow ? "true" : "false");
+        window.localStorage.setItem("enableNotePreview", this.enableNotePreview ? "true" : "false");
+        window.localStorage.setItem("showFifth", this.showFifth ? "true" : "false");
+        window.localStorage.setItem("showThird", this.showThird ? "true" : "false");
+        window.localStorage.setItem("advancedColorScheme", this.advancedColorScheme ? "true" : "false");
+        window.localStorage.setItem("notesOutsideScale", this.notesOutsideScale ? "true" : "false");
+        window.localStorage.setItem("defaultScale", Config.scales[this.defaultScale].name);
+        window.localStorage.setItem("showLetters", this.showLetters ? "true" : "false");
+        window.localStorage.setItem("showChannels", this.showChannels ? "true" : "false");
+        window.localStorage.setItem("showScrollBar", this.showScrollBar ? "true" : "false");
+        window.localStorage.setItem("alwaysFineNoteVol", this.alwaysFineNoteVol ? "true" : "false");
+        window.localStorage.setItem("displayVolumeBar", this.displayVolumeBar ? "true" : "false");
+        window.localStorage.setItem("enableChannelMuting", this.enableChannelMuting ? "true" : "false");
+        window.localStorage.setItem("instrumentCopyPaste", this.instrumentCopyPaste ? "true" : "false");
+        window.localStorage.setItem("instrumentImportExport", this.instrumentImportExport ? "true" : "false");
+        window.localStorage.setItem("displayBrowserUrl", this.displayBrowserUrl ? "true" : "false");
+        window.localStorage.setItem("pressControlForShortcuts", this.pressControlForShortcuts ? "true" : "false");
+        window.localStorage.setItem("enableMidi", this.enableMidi ? "true" : "false");
+        window.localStorage.setItem("showRecordButton", this.showRecordButton ? "true" : "false");
+        window.localStorage.setItem("snapRecordedNotesToRhythm", this.snapRecordedNotesToRhythm ? "true" : "false");
+        window.localStorage.setItem("ignorePerformedNotesNotInScale", this.ignorePerformedNotesNotInScale ? "true" : "false");
+        window.localStorage.setItem("metronomeCountIn", this.metronomeCountIn ? "true" : "false");
+        window.localStorage.setItem("metronomeWhileRecording", this.metronomeWhileRecording ? "true" : "false");
+        window.localStorage.setItem("showOscilloscope", this.showOscilloscope ? "true" : "false");
+        window.localStorage.setItem("showSampleLoadingStatus", this.showSampleLoadingStatus ? "true" : "false");
+        window.localStorage.setItem("showDescription", this.showDescription ? "true" : "false");
+        window.localStorage.setItem("showInstrumentScrollbars", this.showInstrumentScrollbars ? "true" : "false");
+        window.localStorage.setItem("notesFlashWhenPlayed", this.notesFlashWhenPlayed ? "true" : "false");
+        window.localStorage.setItem("selectionCounter", this.selectionCounter ? "true" : "false");
+        window.localStorage.setItem("promptSongDetails", this.promptSongDetails ? "true" : "false");
+        window.localStorage.setItem("keyboardLayout", this.keyboardLayout);
+        window.localStorage.setItem("bassOffset", String(this.bassOffset));
+        window.localStorage.setItem("layout", this.layout);
+        window.localStorage.setItem("colorTheme", this.colorTheme);
+        window.localStorage.setItem("customTheme", this.customTheme);
+        window.localStorage.setItem("customFontName", this.customFont);
+        window.localStorage.setItem("backgroundName", this.customBG);
+        window.localStorage.setItem("customIconsName", this.customIcons);
+        window.localStorage.setItem("customBorderName", this.customBorder);
+        window.localStorage.setItem("customCursorName", this.customCursor);
+        window.localStorage.setItem("customTheme2", this.customTheme2);
+        window.localStorage.setItem("volume", String(this.volume));
+        window.localStorage.setItem("visibleOctaves", String(this.visibleOctaves));
+        window.localStorage.setItem("closePromptByClickoff", this.closePromptByClickoff ? "true" : "false");
+        window.localStorage.setItem("frostedGlassBackground", this.frostedGlassBackground ? "true" : "false");
+        window.localStorage.setItem("displayShortcutButtons", this.displayShortcutButtons ? "true" : "false");
+        window.localStorage.setItem("oldMobileLayout", this.oldMobileLayout ? "true" : "false");
+        window.localStorage.setItem("oldModNotes", this.oldModNotes ? "true" : "false");
+        window.localStorage.setItem("instrumentSettingsSimplifier", this.instrumentSettingsSimplifier ? "true" : "false");
+    }
+}
+Preferences.defaultVisibleOctaves = 3;
+//# sourceMappingURL=Preferences.js.map
