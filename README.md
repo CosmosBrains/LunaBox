@@ -1,5 +1,7 @@
 # LunaBox
 
+VERY INCOMPLETE.
+
 LunaBox is an online tool for sketching and sharing instrumental music.
 This mod is a modification of AbyssBox, which is a modification of Ultrabox and Goldbox, which itself is a modification of JummBox, which inturn is a modification of the [original BeepBox](https://beepbox.co).
 
@@ -17,3 +19,4 @@ JummBox is developed by [Jummbus](http://www.twitter.com/jummbus).
 The source code is available under the MIT license.
 
 I will write how to compile it, but for now use the BeepBox compile page.
+
