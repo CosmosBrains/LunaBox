@@ -38272,14 +38272,14 @@ var beepbox = (function (exports) {
                             if (synth.song != null) {
                                 if (synth.song.setSongTheme != null) {
                                     if (((_a = synth.song) === null || _a === void 0 ? void 0 : _a.setSongTheme) == "none") {
-                                        ColorConfig.setTheme(colorTheme === null ? "AbyssBox Classic" : colorTheme);
+                                        ColorConfig.setTheme(colorTheme === null ? "Ghost House 2" : colorTheme);
                                     }
                                     else {
                                         ColorConfig.setTheme(synth.song.setSongTheme);
                                     }
                                 }
                                 else {
-                                    ColorConfig.setTheme(colorTheme === null ? "AbyssBox Classic" : colorTheme);
+                                    ColorConfig.setTheme(colorTheme === null ? "Ghost House 2" : colorTheme);
                                 }
                             }
                         }
