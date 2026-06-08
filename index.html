@@ -346,9 +346,9 @@
                 </div>
             </div>
             <div class="bsky-embed" style="justify-content: center; display: flex; cursor: pointer; margin-top: 10px;">
-                <div onclick="window.open('./manual.html', '_blank')" style="height: 80px; background: #421422; width: 450px; border-radius: 20px; border: solid 1px #8d2b50; display: flex; flex-direction: row; align-items: center;">
-                    <div style="height: 100%;width: 80px;border-right: 1px solid #8d2b50;/*! border-radius: 10px; */background-image: url(./image_assets/manual.png);background-size: 90%;background-repeat: no-repeat;background-position: center;"></div>
-                    <div style="flex: 1;text-align: center;font-size: 21px;text-decoration: underline;color: #ff668c;">Find the LunaBox User Manual here!</div>
+                <div onclick="window.open('./manual.html', '_blank')" style="height: 80px; background: #130000; width: 450px; border-radius: 20px; border: solid 1px #ff0000; display: flex; flex-direction: row; align-items: center;">
+                    <div style="height: 100%;width: 80px;border-right: 1px solid #ff0000;/*! border-radius: 10px; */background-image: url(./image_assets/manual.png);background-size: 90%;background-repeat: no-repeat;background-position: center;"></div>
+                    <div style="flex: 1;text-align: center;font-size: 21px;text-decoration: underline;color: #ff0000;">Find the LunaBox User Manual here!</div>
                 </div>
             </div>
             <!--
@@ -374,41 +374,41 @@
                     <p>
                         You can add or remove notes by clicking on the gray rows at the top.
                         LunaBox automatically plays the notes out loud for you. Try it!
-			    <img id="Hotdog" src="image_assets/hotdog.png" width="500" height="333" onclick="changeHotdogSize()"/>
+			    <!-- <img id="Hotdog" src="image_assets/hotdog.png" width="500" height="333" onclick="changeHotdogSize()"/> -->
 				<script>
-				function changeHotdogSize(){
+				// function changeHotdogSize(){
 
-					var image = document.getElementById('Hotdog');
-					image.width = Math.random() * (750 - 20) + 20;
-					image.height = Math.random() * (499 - 20) + 20;
+				// 	var image = document.getElementById('Hotdog');
+				// 	image.width = Math.random() * (750 - 20) + 20;
+				// 	image.height = Math.random() * (499 - 20) + 20;
 
-                    var explosion = new Audio('image_assets/explosion.mp3');
+                //     var explosion = new Audio('image_assets/explosion.mp3');
 
-                    function getRandomInt(max) {
-                    return Math.floor(Math.random() * max);
-                    }
+                //     function getRandomInt(max) {
+                //     return Math.floor(Math.random() * max);
+                //     }
 
-                    var shouldExplode = getRandomInt(5);
-                    var hotdogSkin = getRandomInt(15);
+                //     var shouldExplode = getRandomInt(5);
+                //     var hotdogSkin = getRandomInt(15);
 
-                    if (shouldExplode != 1) {
-                        if (hotdogSkin >= 3) {
-                        image.src = ("image_assets/hotdog.png"); } 
-                        else if (hotdogSkin == 2) {
-                        image.src = ("image_assets/banana.png"); }
-                        else if (hotdogSkin == 1) {
-                        image.src = ("image_assets/pizza.png"); }
-                        else if (hotdogSkin == 0) {
-                        image.src = ("image_assets/donut.png"); }
-                    }
+                //     if (shouldExplode != 1) {
+                //         if (hotdogSkin >= 3) {
+                //         image.src = ("image_assets/hotdog.png"); } 
+                //         else if (hotdogSkin == 2) {
+                //         image.src = ("image_assets/banana.png"); }
+                //         else if (hotdogSkin == 1) {
+                //         image.src = ("image_assets/pizza.png"); }
+                //         else if (hotdogSkin == 0) {
+                //         image.src = ("image_assets/donut.png"); }
+                //     }
 
-                    if (shouldExplode == 1) {
-                        console.log("Hello! I exploded!");
-                        explosion.play();
-                        image.src = ("image_assets/explosion.gif");
+                //     if (shouldExplode == 1) {
+                //         console.log("Hello! I exploded!");
+                //         explosion.play();
+                //         image.src = ("image_assets/explosion.gif");
                         
-                    }
-                }
+                //     }
+                // }
 				</script>
 
                     </p>
@@ -460,11 +460,11 @@
                         -->
                     </p>
                     <p>
-                        You can download and use <a href="https://github.com/choptop84/LunaBox-source" target="_blank">the source code</a> under the MIT license.
+                        You can download and use <a href="https://github.com/CosmosBrains/LunaBox" target="_blank">the source code</a> under the MIT license.
                         The original BeepBox source code by John Nesky can be found <a href="https://github.com/johnnesky/beepbox" target="_blank">here</a>.
                     </p>
                     <p>
-                        The patch notes of LunaBox are available <a href="./patch-notes">here</a>.
+                        <!-- The patch notes of LunaBox are available <a href="./patch-notes">here</a>. -->
                     </p>     
                 </section>
             </main>
@@ -481,7 +481,7 @@
     </div>
 
     <div>
-        <img id="egg" src="./egg/egg.png" style="display: none; cursor:pointer; width: 10px; height: 13px; left:0; bottom: 0; position: fixed;" onclick="toEgg()"/>
+        <!-- <img id="egg" src="./egg/egg.png" style="display: none; cursor:pointer; width: 10px; height: 13px; left:0; bottom: 0; position: fixed;" onclick="toEgg()"/> -->
         <script>
 
             function getRandomInt(max) {
@@ -588,12 +588,12 @@
         "  Now using arrays!",
         '  No association with "Abyss Box"',
         "  woah",
-        ", also has developed BoxBeep!",
-        "  named after My Abyss!",
-        "  check out My Abyss!",
+        ", also has developed... nothing yet",
+        "  named after LUNA",
+        "  check out TerraSphere!",
         "  Is not full of water!",
         "  Also try NepBox!",
-        "  Also try MidBox!",
+        "  Also try AbyssBox!",
         "  best mod lol",
         "  Samples better not be broken again!",
         "  Excessive!",
@@ -616,7 +616,7 @@
         "  Make me a melody!",
         "  Random!",
         "  One of the mods of all time!",
-        "  Fortnite?!",
+        "  minceraft",
         "  What time is it? It is "+timeNum+" right now",
         "  Too many plants!",
         "  Glyde is in WubWub with Dubstep!",

@@ -10,10 +10,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/js/select2.min.js"></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AbyssBox 404</title>
-    <meta name="application-name" content="AbyssBox" />
-    <meta name="apple-mobile-web-app-title" content="AbyssBox">
-    <meta name="description" content="AbyssBox has ran into an error!" />
+    <title>LunaBox 404</title>
+    <meta name="application-name" content="LunaBox" />
+    <meta name="apple-mobile-web-app-title" content="LunaBox">
+    <meta name="description" content="LunaBox has ran into an error!" />
     <meta name="keywords" content="chiptune, instrumental, music, song, melody, composition, tool, free, square wave, NES, NSF, JummBox, jummbox, BeepBox, beepbox, GoldBox, goldBox" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -32,9 +32,9 @@
             background: var(--page-margin, black);
             overflow-x: hidden;
             font-size: large;
-            font-family: 'B612', sans-serif;
+            font-family: Arial;
             line-height: 1.3;
-            color: var(--primary-text, white);
+            color: var(--primary-text, rgb(255, 0, 0));
         }
 
         body {
@@ -94,7 +94,6 @@
         }
 
         .donation input[type="submit"] {
-            -webkit-appearance: none;
             background: none;
             border: none;
             font-family: inherit;
@@ -151,15 +150,37 @@
     </style>
   </body>
 <!--<font color="#9c64f7">404</font>-->
-<h1>... oops.</h1>
+<h1>YOU ARE NOT SUPPOSED TO BE HERE</h1>
 
-<p>So it seems that, for whatever reason, you hit a 404.</p>  
-<h1><img id="404" src="../image_assets/abyssbox_uh_oh_404.png" /></h1>
+<p>GET OUT GET OUT GET OUT GET OUT 404 404 404 404</p>  
+<h1><img id="404" src="./image_assets/LunaBox_uh_oh_404.png" ></h1>
   
-  <audio controls="false" autoplay="true" loop="true">
-  <source src="../Game_Over.ogg" type="audio/ogg">
-  Your browser does not support the audio element.
+  <!-- <audio controls="false" autoplay="true" loop="true">
+  <source src="Game_Over.ogg" type="audio/ogg"> -->
+  <!-- Your browser does not support the audio element. -->
 </audio> 
-	
+<!-- <script>
+    var clickCount = 1;
+    function change404Size(){
+        var image = document.getElementById('404');
+        var splat = new Audio('./image_assets/splat.mp3');
+        var explosion = new Audio('./image_assets/explosion.mp3');
+        image.width = image.width + (20 * (clickCount));
+        image.height = image.height - (10 * clickCount);
+        clickCount++;
+        if (clickCount < 12) { 
+            splat.play();
+        } else if (clickCount == 12) {
+            explosion.play();
+			image.height = Math.random() * (640 - 20) + 20;
+            image.src = ("./image_assets/explosion.gif");
+        } else if (clickCount == 13) {
+            image.src = ("./image_assets/LunaBox_uh_oh_404.png");
+            image.width = 576;
+            image.height = 640;
+            clickCount = 1;
+        }
+    }
+    </script> -->
 </body>
 </html>
