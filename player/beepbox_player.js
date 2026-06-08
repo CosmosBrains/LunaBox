@@ -2298,7 +2298,7 @@ var beepbox = (function (exports) {
         static setTheme(name) {
             let theme = this.themes[name];
             if (theme == undefined)
-                theme = this.themes["Ghost House 2"];
+                theme = this.themes["LunaBox"];
             this._styleElement.textContent = theme;
             this.currentSetTheme = name;
             const themeColor = document.querySelector("meta[name='theme-color']");
@@ -2397,8 +2397,11 @@ var beepbox = (function (exports) {
     ColorConfig.colorLookup = new Map();
     ColorConfig.usesColorFormula = false;
     ColorConfig.usesPianoScheme = false;
-    ColorConfig.currentSetTheme = "Ghost House 2";
+    ColorConfig.currentSetTheme = "LunaBox";
     ColorConfig.themes = {
+        "LunaBox": `
+			:root { --page-margin: #130000; --editor-background: #130000; --hover-preview: white; --playhead: rgba(255, 255, 255, 0.9); --primary-text: #ffffff; --secondary-text: #ffffff; --inverted-text: #000000; --text-selection: rgba(119,68,255,0.99); --box-selection-fill: #ff6f00; --loop-accent: #ff0000; --link-accent: #962727; --ui-widget-background: #5c0000; --ui-widget-focus: #450000; --pitch-background: #7d0000; --tonic: #ff0000; --fifth-note: #962727; --third-note: #d2192a; --white-piano-key: #ccbca5; --black-piano-key: #40382f; --use-color-formula: true; --track-editor-bg-pitch: #7d1f00; --track-editor-bg-pitch-dim: #401000; --track-editor-bg-noise: #7d0000; --track-editor-bg-noise-dim: #400000; --track-editor-bg-mod: #7d0028; --track-editor-bg-mod-dim: #470017; --multiplicative-mod-slider: #9f8460; --overwriting-mod-slider: #9f6460; --indicator-primary: #b38949; --indicator-secondary: #543d1d; --select2-opt-group: #4f3b19; --input-box-outline: #1a0404; --mute-button-normal: #dd5d5d; --mute-button-mod: #ba3d36; --mod-label-primary: #541616; --mod-label-secondary-text: rgb(120, 87, 86); --mod-label-primary-text: gray; --progress-bar: #ff0000; --pitch-secondary-channel-hue: 0; --pitch-secondary-channel-hue-scale: 0; --pitch-secondary-channel-sat: 43; --pitch-secondary-channel-sat-scale: 0.1; --pitch-secondary-channel-lum: 60; --pitch-secondary-channel-lum-scale: 0.05; --pitch-primary-channel-hue: -4; --pitch-primary-channel-hue-scale: 6.1; --pitch-primary-channel-sat: 75; --pitch-primary-channel-sat-scale: 0.1; --pitch-primary-channel-lum: 60; --pitch-primary-channel-lum-scale: 0.05; --pitch-secondary-note-hue: -4; --pitch-secondary-note-hue-scale: 6.1; --pitch-secondary-note-sat: 93.9; --pitch-secondary-note-sat-scale: 0.1; --pitch-secondary-note-lum: 20; --pitch-secondary-note-lum-scale: 0.05; --pitch-primary-note-hue: -4; --pitch-primary-note-hue-scale: 6.1; --pitch-primary-note-sat: 65; --pitch-primary-note-sat-scale: 0.05; --pitch-primary-note-lum: 60; --pitch-primary-note-lum-scale: 0.05; --noise-secondary-channel-hue: 0; --noise-secondary-channel-hue-scale: 2; --noise-secondary-channel-sat: 65; --noise-secondary-channel-sat-scale: 0; --noise-secondary-channel-lum: 60; --noise-secondary-channel-lum-scale: 0; --noise-primary-channel-hue: 0; --noise-primary-channel-hue-scale: 1; --noise-primary-channel-sat: 100; --noise-primary-channel-sat-scale: 1; --noise-primary-channel-lum: 63.5; --noise-primary-channel-lum-scale: 0; --noise-secondary-note-hue: 24; --noise-secondary-note-hue-scale: 2; --noise-secondary-note-sat: 100; --noise-secondary-note-sat-scale: 0; --noise-secondary-note-lum: 25; --noise-secondary-note-lum-scale: 0; --noise-primary-note-hue: 24; --noise-primary-note-hue-scale: 2; --noise-primary-note-sat: 75; --noise-primary-note-sat-scale: 1; --noise-primary-note-lum: 60; --noise-primary-note-lum-scale: 1; --mod-secondary-channel-hue: 55; --mod-secondary-channel-hue-scale: 1.5; --mod-secondary-channel-sat: 100; --mod-secondary-channel-sat-scale: 0; --mod-secondary-channel-lum: 20; --mod-secondary-channel-lum-scale: 0; --mod-primary-channel-hue: 55; --mod-primary-channel-hue-scale: 1.5; --mod-primary-channel-sat: 96; --mod-primary-channel-sat-scale: 0; --mod-primary-channel-lum: 50; --mod-primary-channel-lum-scale: 0; --mod-secondary-note-hue: 55; --mod-secondary-note-hue-scale: 1.5; --mod-secondary-note-sat: 92; --mod-secondary-note-sat-scale: 0; --mod-secondary-note-lum: 45; --mod-secondary-note-lum-scale: 0; --mod-primary-note-hue: 55; --mod-primary-note-hue-scale: 1.5; --mod-primary-note-sat: 96; --mod-primary-note-sat-scale: 0; --mod-primary-note-lum: 85; --mod-primary-note-lum-scale: 0; --note-flash: #ffffff; --note-flash-secondary: #ffffff77; } 
+	  		`,
         "AbyssBox Classic": `
 			:root {		
 			--page-margin: #1e0915; 		
@@ -24074,8 +24077,8 @@ var beepbox = (function (exports) {
             return (_a = EditorConfig.presetCategories[0].presets.dictionary) === null || _a === void 0 ? void 0 : _a[TypePresets === null || TypePresets === void 0 ? void 0 : TypePresets[instrument]];
         }
     }
-    EditorConfig.version = "1.7";
-    EditorConfig.versionDisplayName = "AbyssBox " + EditorConfig.version;
+    EditorConfig.version = "0.1";
+    EditorConfig.versionDisplayName = "LunaBox " + EditorConfig.version;
     EditorConfig.releaseNotesURL = "./patch_notes.html";
     EditorConfig.isOnMac = /^Mac/i.test(navigator.platform) || /Mac OS X/i.test(navigator.userAgent) || /^(iPhone|iPad|iPod)/i.test(navigator.platform) || /(iPhone|iPad|iPod)/i.test(navigator.userAgent);
     EditorConfig.ctrlSymbol = EditorConfig.isOnMac ? "⌘" : "Ctrl+";
@@ -28223,7 +28226,7 @@ var beepbox = (function (exports) {
                 fromUltraBox = true;
                 charIndex++;
             }
-            else if (variantTest == 0x61) {
+            else if (variantTest == 0x6C) {
                 fromAbyssBox = true;
                 charIndex++;
             }
@@ -31200,7 +31203,7 @@ var beepbox = (function (exports) {
             this.masterGain = 1.0;
         }
     }
-    Song._format = Config.jsonFormat;
+    Song._format = "LunaBox";
     Song._oldestBeepboxVersion = 2;
     Song._latestBeepboxVersion = 9;
     Song._oldestJummBoxVersion = 1;
@@ -31211,7 +31214,7 @@ var beepbox = (function (exports) {
     Song._latestUltraBoxVersion = 6;
     Song._oldestAbyssBoxVersion = 1;
     Song._latestAbyssBoxVersion = 3;
-    Song._variant = 0x61;
+    Song._variant = 0x6C;
     class PickedString {
         constructor() {
             this.delayLine = null;
@@ -38272,14 +38275,14 @@ var beepbox = (function (exports) {
                             if (synth.song != null) {
                                 if (synth.song.setSongTheme != null) {
                                     if (((_a = synth.song) === null || _a === void 0 ? void 0 : _a.setSongTheme) == "none") {
-                                        ColorConfig.setTheme(colorTheme === null ? "Ghost House 2" : colorTheme);
+                                        ColorConfig.setTheme(colorTheme === null ? "LunaBox" : colorTheme);
                                     }
                                     else {
                                         ColorConfig.setTheme(synth.song.setSongTheme);
                                     }
                                 }
                                 else {
-                                    ColorConfig.setTheme(colorTheme === null ? "Ghost House 2" : colorTheme);
+                                    ColorConfig.setTheme(colorTheme === null ? "LunaBox" : colorTheme);
                                 }
                             }
                         }
