@@ -1,7 +1,5 @@
 # LunaBox
 
-VERY INCOMPLETE.
-
 LunaBox is an online tool for sketching and sharing instrumental music.
 This mod is a modification of AbyssBox, which is a modification of Ultrabox and Goldbox, which itself is a modification of JummBox, which in turn is a modification of the [original BeepBox](https://beepbox.co).
 
