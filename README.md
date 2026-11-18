@@ -18,5 +18,5 @@ This is only the website, but if you want to make your own mods head to John Nes
 
 ## License
 
-The source code is available under the MIT license.
+The compiled code is available under the MIT license.
 
